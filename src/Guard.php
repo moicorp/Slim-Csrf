@@ -265,19 +265,21 @@ class Guard implements MiddlewareInterface
     }
 
     /**
-     * @return string
+     * @param ServerRequestInterface $request
+     * @return string|null
      */
-    public function getHttpHeaderNameKey(): string
+    public function getTokenNameFromRequest(ServerRequestInterface $request): ?string
     {
-        return 'x-csrf-token-name';
+        return $request->getHeader('x-csrf-token-name')[0] ?? null;
     }
 
     /**
-     * @return string
+     * @param ServerRequestInterface $request
+     * @return string|null
      */
-    public function getHttpHeaderValueKey(): string
+    public function getTokenValueFromRequest(ServerRequestInterface $request): ?string
     {
-        return 'x-csrf-token-value';
+        return $request->getHeader('x-csrf-token-value')[0] ?? null;
     }
 
     /**
@@ -454,8 +456,8 @@ class Guard implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // token は必ず http header 越しに取得。
-        $name = $request->getHeader($this->getHttpHeaderNameKey())[0] ?? null;
-        $value = $request->getHeader($this->getHttpHeaderValueKey())[0] ?? null;
+        $name = $this->getTokenNameFromRequest($request);
+        $value = $this->getTokenValueFromRequest($request);
 
         if (in_array($request->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             $isValid = $this->validateToken((string) $name, (string) $value);

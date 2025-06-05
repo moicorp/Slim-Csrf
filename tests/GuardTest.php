@@ -354,11 +354,11 @@ class GuardTest extends TestCase
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderNameKey())
+            ->getHeader('x-csrf-token-name')
             ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderValueKey())
+            ->getHeader('x-csrf-token-value')
             ->willReturn([$this->maskToken($mw, 'test_value123')])
             ->shouldBeCalledOnce();
 
@@ -417,11 +417,11 @@ class GuardTest extends TestCase
             ->shouldBeCalledOnce();
 
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderNameKey())
+            ->getHeader('x-csrf-token-name')
             ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderValueKey())
+            ->getHeader('x-csrf-token-value')
             ->willReturn([])
             ->shouldBeCalledOnce();
 
@@ -457,11 +457,11 @@ class GuardTest extends TestCase
             ->willReturn('GET')
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderNameKey())
+            ->getHeader('x-csrf-token-name')
             ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderValueKey())
+            ->getHeader('x-csrf-token-value')
             ->willReturn(['test_value123'])
             ->shouldBeCalledOnce();
 
@@ -589,11 +589,11 @@ class GuardTest extends TestCase
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderNameKey())
+            ->getHeader('x-csrf-token-name')
             ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader($mw->getHttpHeaderValueKey())
+            ->getHeader('x-csrf-token-value')
             ->willReturn([$this->maskToken($mw, 'test_value123')])
             ->shouldBeCalledOnce();
 
