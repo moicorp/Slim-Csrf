@@ -437,14 +437,8 @@ class Guard implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $body = $request->getParsedBody();
         $name = null;
         $value = null;
-
-        if (is_array($body)) {
-            $name = $body[$this->getTokenNameKey()] ?? null;
-            $value = $body[$this->getTokenValueKey()] ?? null;
-        }
 
         if ($name === null && $value === null) {
             // DELETE request may not have a request body. Supply token by headers

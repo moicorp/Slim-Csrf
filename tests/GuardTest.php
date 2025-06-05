@@ -111,11 +111,6 @@ class GuardTest extends TestCase
             ->shouldBeCalledTimes(2);
 
         $requestProphecy
-            ->getParsedBody()
-            ->willReturn([])
-            ->shouldBeCalledOnce();
-
-        $requestProphecy
             ->getHeader(Argument::type('string'))
             ->willReturn([])
             ->shouldBeCalledTimes(2);
@@ -173,11 +168,6 @@ class GuardTest extends TestCase
             ->withAttribute(Argument::type('string'), Argument::type('string'))
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
-
-        $requestProphecy
-            ->getParsedBody()
-            ->willReturn([])
-            ->shouldBeCalledOnce();
 
         $requestProphecy
             ->getHeader(Argument::type('string'))
@@ -364,13 +354,13 @@ class GuardTest extends TestCase
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
         $requestProphecy
-            ->getParsedBody()
-            ->willReturn([
-                'test_name' => 'test_name',
-                'test_value' => $this->maskToken($mw, 'test_value123'),
-            ])
+            ->getHeader('test_name')
+            ->willReturn(['test_name'])
             ->shouldBeCalledOnce();
-
+        $requestProphecy
+            ->getHeader('test_value')
+            ->willReturn([$this->maskToken($mw, 'test_value123')])
+            ->shouldBeCalledOnce();
 
         $mw->process($requestProphecy->reveal(), $requestHandlerProphecy->reveal());
         self::assertArrayNotHasKey('test_name', $storage);
@@ -427,10 +417,12 @@ class GuardTest extends TestCase
             ->shouldBeCalledOnce();
 
         $requestProphecy
-            ->getParsedBody()
-            ->willReturn([
-                             'test_name' => 'test_value123',
-                         ])
+            ->getHeader('test_name')
+            ->willReturn(['test_value123'])
+            ->shouldBeCalledOnce();
+        $requestProphecy
+            ->getHeader('test_value')
+            ->willReturn([])
             ->shouldBeCalledOnce();
 
         $mw->process($requestProphecy->reveal(), $requestHandlerProphecy->reveal());
@@ -465,11 +457,12 @@ class GuardTest extends TestCase
             ->willReturn('GET')
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getParsedBody()
-            ->willReturn([
-                'test_name' => 'test_name',
-                'test_value' => 'test_value123',
-            ])
+            ->getHeader('test_name')
+            ->willReturn(['test_name'])
+            ->shouldBeCalledOnce();
+        $requestProphecy
+            ->getHeader('test_value')
+            ->willReturn(['test_value123'])
             ->shouldBeCalledOnce();
 
         $mw->process($requestProphecy->reveal(), $requestHandlerProphecy->reveal());
@@ -485,7 +478,6 @@ class GuardTest extends TestCase
         $responseProphecy = $this->prophesize(ResponseInterface::class);
 
         $requestProphecy = $this->prophesize(ServerRequestInterface::class);
-        $requestProphecy->getParsedBody()->willReturn(null)->shouldBeCalledOnce();
         $requestProphecy->getHeader(Argument::type('string'))->willReturn([])->shouldBeCalledTimes(2);
         $requestProphecy
             ->getMethod()
@@ -518,7 +510,6 @@ class GuardTest extends TestCase
         $responseProphecy = $this->prophesize(ResponseInterface::class);
 
         $requestProphecy = $this->prophesize(ServerRequestInterface::class);
-        $requestProphecy->getParsedBody()->willReturn(null)->shouldBeCalledOnce();
         $requestProphecy->getHeader(Argument::type('string'))->willReturn([])->shouldBeCalledTimes(2);
         $requestProphecy
             ->getMethod()
@@ -597,10 +588,6 @@ class GuardTest extends TestCase
             ->withAttribute(Argument::type('string'), Argument::type('string'))
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
-        $requestProphecy
-            ->getParsedBody()
-            ->willReturn([])
-            ->shouldBeCalledOnce();
         $requestProphecy
             ->getHeader('test_name')
             ->willReturn(['test_name'])
