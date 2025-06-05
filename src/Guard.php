@@ -267,6 +267,22 @@ class Guard implements MiddlewareInterface
     /**
      * @return string
      */
+    public function getHttpHeaderNameKey(): string
+    {
+        return 'x-' . $this->prefix . '-name';
+    }
+
+    /**
+     * @return string
+     */
+    public function getHttpHeaderValueKey(): string
+    {
+        return 'x-' . $this->prefix . '-value';
+    }
+
+    /**
+     * @return string
+     */
     public function getTokenNameKey(): string
     {
         return $this->prefix . '_name';
@@ -437,14 +453,9 @@ class Guard implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $name = null;
-        $value = null;
-
-        if ($name === null && $value === null) {
-            // DELETE request may not have a request body. Supply token by headers
-            $name = $request->getHeader($this->getTokenNameKey())[0] ?? null;
-            $value = $request->getHeader($this->getTokenValueKey())[0] ?? null;
-        }
+        // token は必ず http header 越しに取得。
+        $name = $request->getHeader($this->getHttpHeaderNameKey())[0] ?? null;
+        $value = $request->getHeader($this->getHttpHeaderValueKey())[0] ?? null;
 
         if (in_array($request->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             $isValid = $this->validateToken((string) $name, (string) $value);

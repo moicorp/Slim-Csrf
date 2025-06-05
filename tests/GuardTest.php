@@ -354,11 +354,11 @@ class GuardTest extends TestCase
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
         $requestProphecy
-            ->getHeader('test_name')
-            ->willReturn(['test_name'])
+            ->getHeader($mw->getHttpHeaderNameKey())
+            ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader('test_value')
+            ->getHeader($mw->getHttpHeaderValueKey())
             ->willReturn([$this->maskToken($mw, 'test_value123')])
             ->shouldBeCalledOnce();
 
@@ -417,11 +417,11 @@ class GuardTest extends TestCase
             ->shouldBeCalledOnce();
 
         $requestProphecy
-            ->getHeader('test_name')
-            ->willReturn(['test_value123'])
+            ->getHeader($mw->getHttpHeaderNameKey())
+            ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader('test_value')
+            ->getHeader($mw->getHttpHeaderValueKey())
             ->willReturn([])
             ->shouldBeCalledOnce();
 
@@ -457,11 +457,11 @@ class GuardTest extends TestCase
             ->willReturn('GET')
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader('test_name')
-            ->willReturn(['test_name'])
+            ->getHeader($mw->getHttpHeaderNameKey())
+            ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader('test_value')
+            ->getHeader($mw->getHttpHeaderValueKey())
             ->willReturn(['test_value123'])
             ->shouldBeCalledOnce();
 
@@ -589,11 +589,11 @@ class GuardTest extends TestCase
             ->willReturn($requestProphecy->reveal())
             ->shouldBeCalledTimes(2);
         $requestProphecy
-            ->getHeader('test_name')
-            ->willReturn(['test_name'])
+            ->getHeader($mw->getHttpHeaderNameKey())
+            ->willReturn([$mw->getTokenNameKey()])
             ->shouldBeCalledOnce();
         $requestProphecy
-            ->getHeader('test_value')
+            ->getHeader($mw->getHttpHeaderValueKey())
             ->willReturn([$this->maskToken($mw, 'test_value123')])
             ->shouldBeCalledOnce();
 
