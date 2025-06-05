@@ -269,7 +269,7 @@ class Guard implements MiddlewareInterface
      */
     public function getHttpHeaderNameKey(): string
     {
-        return 'x-' . $this->prefix . '-name';
+        return 'x-csrf-token-name';
     }
 
     /**
@@ -277,7 +277,7 @@ class Guard implements MiddlewareInterface
      */
     public function getHttpHeaderValueKey(): string
     {
-        return 'x-' . $this->prefix . '-value';
+        return 'x-csrf-token-value';
     }
 
     /**
