@@ -47,6 +47,9 @@ use const PHP_SESSION_ACTIVE;
 
 class Guard implements MiddlewareInterface
 {
+    public const FORM_TOKEN_NAME = 'csrf_token_name';
+    public const FORM_TOKEN_VALUE = 'csrf_token_value';
+
     protected ResponseFactoryInterface $responseFactory;
 
     /**
@@ -268,7 +271,7 @@ class Guard implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @return string|null
      */
-    public function getTokenNameFromRequest(ServerRequestInterface $request): ?string
+    public function getTokenNameFromRequestHeader(ServerRequestInterface $request): ?string
     {
         return $request->getHeader('x-csrf-token-name')[0] ?? null;
     }
@@ -277,9 +280,37 @@ class Guard implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @return string|null
      */
-    public function getTokenValueFromRequest(ServerRequestInterface $request): ?string
+    public function getTokenValueFromRequestHeader(ServerRequestInterface $request): ?string
     {
         return $request->getHeader('x-csrf-token-value')[0] ?? null;
+    }
+
+    protected function getTokenNameFromRequestForm(ServerRequestInterface $request): ?string
+    {
+        if ($request->getMethod() !== 'POST') {
+            return null;
+        }
+
+        $body = $request->getParsedBody();
+        if (is_array($body) && array_key_exists(self::FORM_TOKEN_NAME, $body)) {
+            return $body[self::FORM_TOKEN_NAME];
+        }
+
+        return null;
+    }
+
+    protected function getTokenValueFromRequestForm(ServerRequestInterface $request): ?string
+    {
+        if ($request->getMethod() !== 'POST') {
+            return null;
+        }
+
+        $body = $request->getParsedBody();
+        if (is_array($body) && array_key_exists(self::FORM_TOKEN_VALUE, $body)) {
+            return $body[self::FORM_TOKEN_VALUE];
+        }
+
+        return null;
     }
 
     /**
@@ -456,8 +487,13 @@ class Guard implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // token は必ず http header 越しに取得。
-        $name = $this->getTokenNameFromRequest($request);
-        $value = $this->getTokenValueFromRequest($request);
+        $name = $this->getTokenNameFromRequestHeader($request);
+        $value = $this->getTokenValueFromRequestHeader($request);
+        if (is_null($name) && is_null($value)) {
+            // 両方とも取得できなかった場合、form からの取得にフォールバック。
+            $name = $this->getTokenNameFromRequestForm($request);
+            $value = $this->getTokenValueFromRequestForm($request);
+        }
 
         if (in_array($request->getMethod(), ['POST', 'PUT', 'DELETE', 'PATCH'])) {
             $isValid = $this->validateToken((string) $name, (string) $value);

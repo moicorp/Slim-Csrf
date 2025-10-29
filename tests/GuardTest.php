@@ -103,7 +103,7 @@ class GuardTest extends TestCase
         $requestProphecy
             ->getMethod()
             ->willReturn('POST')
-            ->shouldBeCalledOnce();
+            ->shouldBeCalledTimes(3);
 
         $requestProphecy
             ->withAttribute(Argument::type('string'), Argument::type('string'))
@@ -112,6 +112,11 @@ class GuardTest extends TestCase
 
         $requestProphecy
             ->getHeader(Argument::type('string'))
+            ->willReturn([])
+            ->shouldBeCalledTimes(2);
+
+        $requestProphecy
+            ->getParsedBody()
             ->willReturn([])
             ->shouldBeCalledTimes(2);
 
@@ -162,7 +167,7 @@ class GuardTest extends TestCase
         $requestProphecy
             ->getMethod()
             ->willReturn('POST')
-            ->shouldBeCalledOnce();
+            ->shouldBeCalledTimes(3);
 
         $requestProphecy
             ->withAttribute(Argument::type('string'), Argument::type('string'))
@@ -171,6 +176,11 @@ class GuardTest extends TestCase
 
         $requestProphecy
             ->getHeader(Argument::type('string'))
+            ->willReturn([])
+            ->shouldBeCalledTimes(2);
+
+        $requestProphecy
+            ->getParsedBody()
             ->willReturn([])
             ->shouldBeCalledTimes(2);
 
@@ -482,7 +492,7 @@ class GuardTest extends TestCase
         $requestProphecy
             ->getMethod()
             ->willReturn('GET')
-            ->shouldBeCalledOnce();
+            ->shouldBeCalledTimes(3);
 
         $requestProphecy
             ->withAttribute(Argument::type('string'), Argument::type('string'))
@@ -514,7 +524,7 @@ class GuardTest extends TestCase
         $requestProphecy
             ->getMethod()
             ->willReturn('GET')
-            ->shouldBeCalledOnce();
+            ->shouldBeCalledTimes(3);
 
         $requestProphecy
             ->withAttribute('test_name', 'test_name123')
@@ -598,5 +608,60 @@ class GuardTest extends TestCase
             ->shouldBeCalledOnce();
 
         $mw->process($requestProphecy->reveal(), $requestHandlerProphecy->reveal());
+    }
+
+    public function testTokenFromFormOnPostPassesAndRemovesFromStorage()
+    {
+        $storage = [
+            'test_name' => 'test_value123',
+        ];
+
+        $responseProphecy = $this->prophesize(ResponseInterface::class)
+            ->willImplement(ResponseInterface::class);
+
+        $requestHandlerProphecy = $this->prophesize(RequestHandlerInterface::class);
+        $requestHandlerProphecy
+            ->handle(Argument::type(ServerRequestInterface::class))
+            ->willReturn($responseProphecy->reveal())
+            ->shouldBeCalledOnce(); // 成功時は handler まで到達
+
+        $responseFactoryProphecy = $this->prophesize(ResponseFactoryInterface::class);
+        $mw = new Guard($responseFactoryProphecy->reveal(), 'test', $storage);
+
+        $masked = $this->maskToken($mw, 'test_value123');
+
+        $requestProphecy = $this->prophesize(ServerRequestInterface::class);
+        $requestProphecy
+            ->getMethod()
+            ->willReturn('POST')
+            ->shouldBeCalledTimes(3);
+        // header の値を空にして、form にフォールバックさせる。
+        $requestProphecy
+            ->getHeader('x-csrf-token-name')
+            ->willReturn([])
+            ->shouldBeCalledOnce();
+        $requestProphecy
+            ->getHeader('x-csrf-token-value')
+            ->willReturn([])
+            ->shouldBeCalledOnce();
+        // フォーム値（2回呼ばれる：name,value 取得時）
+        $requestProphecy
+            ->getParsedBody()
+            ->willReturn([
+                Guard::FORM_TOKEN_NAME => $mw->getTokenNameKey(),
+                Guard::FORM_TOKEN_VALUE => $masked,
+            ])
+            ->shouldBeCalledTimes(2);
+
+        // 最後に新しいトークンが withAttribute で付与される
+        $requestProphecy
+            ->withAttribute(Argument::type('string'), Argument::type('string'))
+            ->willReturn($requestProphecy->reveal())
+            ->shouldBeCalledTimes(2);
+
+        $mw->process($requestProphecy->reveal(), $requestHandlerProphecy->reveal());
+
+        // 非永続モードなので使い終わったトークンは消える
+        $this->assertArrayNotHasKey('test_name', $storage);
     }
 }
